@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AetherShield AI - Advanced Deepfake Facial Analysis</title>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="bg-blur-circle bg-blur-1"></div>
+    <div class="bg-blur-circle bg-blur-2"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="model-badge">
+                <i data-lucide="cpu" class="badge-icon animate-pulse"></i>
+                <span>Active Model: MesoNet-4 Neural Network</span>
+            </div>
+            <h1 class="app-title">Aether<span class="gradient-text">Shield AI</span></h1>
+            <p class="app-subtitle">Real-time mesoscopic neural analysis for facial image forgery and deepfake detection.</p>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-workspace">
+            <!-- Left Column: Upload and Live Scanning -->
+            <section class="workspace-card upload-section">
+                <div class="card-header">
+                    <h2 class="section-title"><i data-lucide="image-plus" class="section-icon"></i>Image Upload & Scan</h2>
+                </div>
+
+                <!-- Dropzone Area -->
+                <div class="upload-dropzone" id="dropzone">
+                    <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg, image/webp" style="display: none;">
+                    
+                    <div class="dropzone-content" id="dropzoneContent">
+                        <div class="icon-glow-wrapper">
+                            <i data-lucide="shield-alert" class="dropzone-icon"></i>
+                        </div>
+                        <h3>Drag & drop facial image here</h3>
+                        <p class="subtext">Supports PNG, JPG, JPEG, WEBP (Max 16MB)</p>
+                        <button class="btn btn-primary" id="browseBtn">
+                            <i data-lucide="folder-open"></i> Browse Files
+                        </button>
+                    </div>
+
+                    <!-- Scan Preview Container (Initially Hidden) -->
+                    <div class="scan-preview-container" id="previewContainer">
+                        <div class="preview-wrapper">
+                            <img id="imagePreview" src="" alt="Scan Preview">
+                            <div class="scan-overlay-grid"></div>
+                            <div class="laser-scanner" id="laserScanner"></div>
+                        </div>
+                        <div class="scan-status-panel">
+                            <div class="status-loader-wrapper">
+                                <div class="status-spinner"></div>
+                                <span class="status-title" id="statusTitle">Initializing Scan Engine...</span>
+                            </div>
+                            <div class="console-log-box" id="consoleLogs">
+                                <!-- Dynamic logs filled by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Results Dashboard -->
+            <section class="workspace-card results-section" id="resultsSection">
+                <!-- Empty State (Initially Visible) -->
+                <div class="results-empty-state" id="emptyState">
+                    <i data-lucide="scan-face" class="empty-icon animate-pulse"></i>
+                    <h3>Awaiting Feed</h3>
+                    <p>Upload a facial image to run real-time neural forgery scans and structural consistency verification.</p>
+                </div>
+
+                <!-- Active Results Dashboard (Initially Hidden) -->
+                <div class="results-dashboard" id="resultsDashboard">
+                    <!-- Verdict Header Card -->
+                    <div class="verdict-banner" id="verdictBanner">
+                        <div class="verdict-icon-container" id="verdictIconContainer">
+                            <!-- Icon populated by JS -->
+                        </div>
+                        <div class="verdict-text-container">
+                            <span class="verdict-label">AI Analysis Verdict</span>
+                            <h2 class="verdict-value" id="verdictValue">VERDICT</h2>
+                        </div>
+                        <!-- Score Display -->
+                        <div class="verdict-score-wrapper">
+                            <div class="gauge-chart">
+                                <svg class="gauge-ring" width="80" height="80">
+                                    <circle class="gauge-ring-bg" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                                    <circle class="gauge-ring-fill" id="gaugeFill" stroke="var(--accent-color)" stroke-width="6" stroke-linecap="round" fill="transparent" r="34" cx="40" cy="40"/>
+                                </svg>
+                                <div class="gauge-percentage" id="confidenceValue">0%</div>
+                            </div>
+                            <span class="score-label">Confidence</span>
+                        </div>
+                    </div>
+
+                    <!-- Dual Image Grid -->
+                    <div class="analysis-images-grid">
+                        <div class="image-box">
+                            <span class="image-box-label"><i data-lucide="expand"></i> Detected Facial Regions</span>
+                            <div class="canvas-image-wrapper">
+                                <img id="originalImageResult" src="" alt="Original Image">
+                                <canvas id="boundingBoxCanvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="image-box">
+                            <span class="image-box-label"><i data-lucide="crop"></i> Neural ROI Extract (256x256)</span>
+                            <div class="crop-image-wrapper">
+                                <img id="croppedFaceResult" src="" alt="Cropped Face">
+                                <div id="noFacePlaceholder" class="no-face-fallback">
+                                    <i data-lucide="user-minus"></i>
+                                    <span>No Face Detected<br><small>Analyzing full frame</small></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Metrics and AI Explanation -->
+                    <div class="analysis-details">
+                        <div class="details-card">
+                            <h3><i data-lucide="sliders-horizontal"></i> Scan Diagnostics</h3>
+                            <ul class="metrics-list">
+                                <li>
+                                    <span class="metric-name">File Name:</span>
+                                    <span class="metric-val" id="metaFileName">-</span>
+                                </li>
+                                <li>
+                                    <span class="metric-name">File Size:</span>
+                                    <span class="metric-val" id="metaFileSize">-</span>
+                                </li>
+                                <li>
+                                    <span class="metric-name">Execution Speed:</span>
+                                    <span class="metric-val" id="metaDuration">-</span>
+                                </li>
+                                <li>
+                                    <span class="metric-name">Faces Identified:</span>
+                                    <span class="metric-val" id="metaFacesCount">-</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="details-card">
+                            <h3><i data-lucide="bot"></i> AI Neural Reasoning</h3>
+                            <p class="explanation-text" id="aiExplanation">
+                                Reasoning details...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Reset Action -->
+                    <div class="action-bar">
+                        <button class="btn btn-secondary" id="resetBtn">
+                            <i data-lucide="refresh-cw"></i> Scan Another Image
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Main Controller Script -->
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
